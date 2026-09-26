@@ -66,24 +66,6 @@ jobs:
           BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         timeout-minutes: 10
         run: docker compose build --push
-
-      - name: Create DB connection secret
-        run: |
-          cat > /tmp/rating.txt <<EOF
-          Host=${{ secrets.DB_HOST }};Port=6432;Database=ratings;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
-          EOF
-          cat > /tmp/library.txt <<EOF
-          Host=${{ secrets.DB_HOST }};Port=6432;Database=libraries;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
-          EOF
-          cat > /tmp/reservation.txt <<EOF
-          Host=${{ secrets.DB_HOST }};Port=6432;Database=reservations;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
-          EOF
-          kubectl delete secret db-connection-strings --ignore-not-found
-          kubectl create secret generic db-connection-strings \
-            --from-file=rating-connection=/tmp/rating.txt \
-            --from-file=library-connection=/tmp/library.txt \
-            --from-file=reservation-connection=/tmp/reservation.txt
-          rm -f /tmp/*.txt
           
       - name: Deploy with Helm
         run: |
