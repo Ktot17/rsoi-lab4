@@ -17,18 +17,81 @@ jobs:
 
       - uses: docker/setup-buildx-action@v2
 
-      # TODO build and run unit tests
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        working-directory: src
+        run: dotnet restore
+
+      - name: Build
+        working-directory: src
+        run: dotnet build --no-restore -c Release
+
+      - name: Run unit tests
+        working-directory: src
+        run: dotnet test --no-build -c Release --verbosity normal
+        
+      - name: Install YC CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Authenticate to Yandex Cloud
+        run: |
+          echo '${{ secrets.YC_SA_KEY_JSON }}' > key.json
+          yc config profile create sa-profile
+          yc config set service-account-key key.json --profile sa-profile
+          yc config set cloud-id ${{ secrets.YC_CLOUD_ID }} --profile sa-profile
+          yc config set folder-id ${{ secrets.YC_FOLDER_ID }} --profile sa-profile
+          yc config profile activate sa-profile
+          rm -f key.json
+
+      - name: Login to Yandex Container Registry
+        run: |
+          yc iam create-token | docker login --username iam --password-stdin cr.yandex
+
+      - name: Setup kubectl
+        run: |
+          yc managed-kubernetes cluster get-credentials \
+            ${{ secrets.KUBE_CLUSTER_ID }} \
+            --external \
+            --force
+          kubectl cluster-info
 
       - name: Build images
         timeout-minutes: 10
-        run: docker compose build --push
+        run: docker compose build --provenance=false --sbom=false --push
 
-      # TODO deploy to k8s with liveness and readyness probes
+      - name: Create DB connection secret
+        run: |
+          cat > /tmp/rating.txt <<EOF
+          Host=${{ secrets.DB_HOST }};Port=6432;Database=ratings;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
+          EOF
+          cat > /tmp/library.txt <<EOF
+          Host=${{ secrets.DB_HOST }};Port=6432;Database=libraries;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
+          EOF
+          cat > /tmp/reservation.txt <<EOF
+          Host=${{ secrets.DB_HOST }};Port=6432;Database=reservations;Username=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }};SSL Mode=VerifyFull;
+          EOF
+          kubectl delete secret db-connection-strings --ignore-not-found
+          kubectl create secret generic db-connection-strings \
+            --from-file=rating-connection=/tmp/rating.txt \
+            --from-file=library-connection=/tmp/library.txt \
+            --from-file=reservation-connection=/tmp/reservation.txt
+          rm -f /tmp/*.txt
+          
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install rating     ./helm/app -f ./helm/values/rating.yaml      --wait --timeout 3m
+          helm upgrade --install library    ./helm/app -f ./helm/values/library.yaml     --wait --timeout 3m
+          helm upgrade --install reservation ./helm/app -f ./helm/values/reservation.yaml --wait --timeout 3m
+          helm upgrade --install gateway    ./helm/app -f ./helm/values/gateway.yaml     --wait --timeout 3m
 
       - name: Wait before services are ready
-        run: kubectl wait -n test -l app.kubernetes.io/name=gateway pod --for=condition=Ready --timeout 3m
-      
-      # TODO setup parameters in classroom/autograding.json
+        run: kubectl wait -l app.kubernetes.io/instance=gateway pod --for=condition=Ready --timeout=3m
       
       - name: Autograding
         uses: education/autograding@v1
