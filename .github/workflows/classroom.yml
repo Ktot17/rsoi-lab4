@@ -62,8 +62,10 @@ jobs:
           kubectl cluster-info
 
       - name: Build images
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         timeout-minutes: 10
-        run: docker compose build --provenance=false --sbom=false --push
+        run: docker compose build --push
 
       - name: Create DB connection secret
         run: |
