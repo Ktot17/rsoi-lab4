@@ -39,6 +39,10 @@ step() {
   printf "=== Step %d: scale %s to %s ===\n" "$step" "$deployment" "$replicas"
 
   kubectl scale deployment "$deployment" -n "$namespace" --replicas "$replicas" 
+  
+  if [[ "$replicas" -eq 1 ]]; then
+    kubectl rollout status deployment "$deployment" -n "$namespace" --timeout=3m
+  fi
 
   newman run \
     --delay-request=100 \
