@@ -3,7 +3,7 @@
     {
       "name": "Run Test Script",
       "setup": "",
-      "run": "./scripts/test-script.sh v4 gateway default",
+      "run": "./scripts/test-script.sh v4 rating default",
       "input": "",
       "output": "",
       "comparison": "included",

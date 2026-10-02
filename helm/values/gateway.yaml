@@ -9,6 +9,31 @@ env:
     value: "http://rating:8080"
   - name: ServiceUrls__ReservationServiceUrl
     value: "http://reservation:8080"
+  - name: RabbitMq__Host
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: host
+  - name: RabbitMq__Port
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: port
+  - name: RabbitMq__Username
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: username
+  - name: RabbitMq__Password
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: password
+  - name: RabbitMq__MainExchange
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: main-exchange
 ingress:
   enabled: true
   className: "nginx"

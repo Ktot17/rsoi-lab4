@@ -34,4 +34,12 @@ public class ReservationRepository(PostgresDbContext context) : IReservationRepo
 
     public async Task<int> GetRentedReservationCountAsync(string username) => 
         await context.Reservations.Where(r => r.Username == username).CountAsync();
+
+    public async Task DeleteReservationAsync(Guid reservationId)
+    {
+        var reservation = await context.Reservations.FirstOrDefaultAsync(r => r.ReservationUid == reservationId) 
+                          ?? throw new EntityNotFoundException(typeof(ReservationDb));
+        context.Reservations.Remove(reservation);
+        await context.SaveChangesAsync();
+    }
 }

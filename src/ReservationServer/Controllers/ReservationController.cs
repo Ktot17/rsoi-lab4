@@ -13,7 +13,7 @@ public class ReservationController(IReservationManager reservationManager) : Con
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReservationResponse>>> GetReservationsAsync([FromHeader(Name = "X-User-Name")] string username)
     {
-        var reservations = await reservationManager.GetReservations(username);
+        var reservations = await reservationManager.GetReservationsAsync(username);
         return Ok(reservations.Select(r => new ReservationResponse(r)));
     }
 
@@ -21,7 +21,7 @@ public class ReservationController(IReservationManager reservationManager) : Con
     public async Task<ActionResult<ReservationResponse>> TakeBookAsync(
         [FromHeader(Name = "X-User-Name")] string username, [FromBody] TakeBookRequest request)
     {
-        var reservation = await reservationManager.TakeBook(username, request.LibraryUid, request.BookUid, request.TillDate);
+        var reservation = await reservationManager.TakeBookAsync(username, request.LibraryUid, request.BookUid, request.TillDate);
         return Ok(new ReservationResponse(reservation));
     }
 
@@ -32,7 +32,7 @@ public class ReservationController(IReservationManager reservationManager) : Con
         
         try
         {
-            reservation = await reservationManager.ReturnBook(reservationUid, returnDate.Date);
+            reservation = await reservationManager.ReturnBookAsync(reservationUid, returnDate.Date);
         }
         catch (EntityNotFoundException)
         {
@@ -47,5 +47,12 @@ public class ReservationController(IReservationManager reservationManager) : Con
     {
         var count = await reservationManager.GetRentedReservationCountAsync(username);
         return Ok(count);
+    }
+
+    [HttpDelete("{reservationUid:guid}")]
+    public async Task<ActionResult> DeleteReservationAsync(Guid reservationUid)
+    {
+        await reservationManager.RevertTakeBookAsync(reservationUid);
+        return NoContent();
     }
 }

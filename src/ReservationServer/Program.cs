@@ -17,12 +17,6 @@ builder.Services.AddScoped<IReservationManager, ReservationManager>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<PostgresDbContext>();
-    await db.Database.EnsureCreatedAsync().ConfigureAwait(false);
-}
-
 app.MapControllers();
 app.MapGet("manage/health", () => Results.Ok("Healthy"));
 

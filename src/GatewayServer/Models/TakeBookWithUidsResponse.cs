@@ -1,11 +1,10 @@
 ﻿namespace GatewayServer.Models;
 
-public record TakeBookResponse(
+public record TakeBookWithUidsResponse(
     Guid ReservationUid,
     string Status,
     string StartDate,
     string TillDate,
-    BookInfo Book,
-    LibraryResponse Library,
+    Guid BookUid,
+    Guid LibraryUid,
     UserRatingResponse Rating);
-    

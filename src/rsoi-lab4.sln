@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayBL", "GatewayBL\Gate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayHttpClient", "GatewayHttpClient\GatewayHttpClient.csproj", "{CAA1E20D-DC57-45C1-976A-9EF92881BEC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayUnitTests", "GatewayUnitTests\GatewayUnitTests.csproj", "{761DBA6E-32F7-4375-A55B-0401CE426C97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayRetryBroker", "GatewayRetryBroker\GatewayRetryBroker.csproj", "{0941B73F-EBE9-4815-90B4-BC126A53561E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,9 +80,9 @@ Global
 		{CAA1E20D-DC57-45C1-976A-9EF92881BEC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAA1E20D-DC57-45C1-976A-9EF92881BEC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAA1E20D-DC57-45C1-976A-9EF92881BEC8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{761DBA6E-32F7-4375-A55B-0401CE426C97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{761DBA6E-32F7-4375-A55B-0401CE426C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{761DBA6E-32F7-4375-A55B-0401CE426C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{761DBA6E-32F7-4375-A55B-0401CE426C97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0941B73F-EBE9-4815-90B4-BC126A53561E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0941B73F-EBE9-4815-90B4-BC126A53561E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0941B73F-EBE9-4815-90B4-BC126A53561E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0941B73F-EBE9-4815-90B4-BC126A53561E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
