@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    networks:
+      - library-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  reservation:
+    build:
+      context: ./src/
+      dockerfile: ReservationServer/Dockerfile
+    image: cr.yandex/crp8pmpt39t70k7ra3uf/reservation:${TAG:-latest}
+    container_name: reservation
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8070:8080"
+    environment:
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=reservations;Username=program;Password=test
+    networks:
+      - library-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/manage/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rating:
+    build:
+      context: ./src/
+      dockerfile: RatingServer/Dockerfile
+    image: cr.yandex/crp8pmpt39t70k7ra3uf/rating:${TAG:-latest}
+    container_name: rating
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8050:8080"
+    environment:
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=ratings;Username=program;Password=test
+    networks:
+      - library-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/manage/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  library:
+    build:
+      context: ./src/
+      dockerfile: LibraryServer/Dockerfile
+    image: cr.yandex/crp8pmpt39t70k7ra3uf/library:${TAG:-latest}
+    container_name: library
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8060:8080"
+    environment:
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=libraries;Username=program;Password=test
+    networks:
+      - library-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/manage/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  gateway:
+    build:
+      context: ./src/
+      dockerfile: GatewayServer/Dockerfile
+    image: cr.yandex/crp8pmpt39t70k7ra3uf/gateway:${TAG:-latest}
+    container_name: gateway
+    restart: always
+    depends_on:
+      reservation:
+        condition: service_healthy
+      rating:
+        condition: service_healthy
+      library:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - ServiceUrls__LibraryServiceUrl=http://library:8080
+      - ServiceUrls__RatingServiceUrl=http://rating:8080
+      - ServiceUrls__ReservationServiceUrl=http://reservation:8080
+    networks:
+      - library-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/manage/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
+
+networks:
+  library-network:
+    driver: bridge

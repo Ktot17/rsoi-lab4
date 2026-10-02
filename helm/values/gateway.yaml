@@ -1,0 +1,42 @@
+image:
+  repository: cr.yandex/crp8pmpt39t70k7ra3uf/gateway
+service:
+  port: 8080
+env:
+  - name: ServiceUrls__LibraryServiceUrl
+    value: "http://library:8080"
+  - name: ServiceUrls__RatingServiceUrl
+    value: "http://rating:8080"
+  - name: ServiceUrls__ReservationServiceUrl
+    value: "http://reservation:8080"
+  - name: RabbitMq__Host
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: host
+  - name: RabbitMq__Port
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: port
+  - name: RabbitMq__Username
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: username
+  - name: RabbitMq__Password
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: password
+  - name: RabbitMq__MainExchange
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq-credentials
+        key: main-exchange
+ingress:
+  enabled: true
+  className: "nginx"
+  host: ""
+  path: "/"
+  pathType: "Prefix"
