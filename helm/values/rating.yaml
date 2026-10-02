@@ -1,6 +1,5 @@
 image:
   repository: cr.yandex/crp8pmpt39t70k7ra3uf/rating
-  tag: "latest"
 service:
   port: 8080
 env:
