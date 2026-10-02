@@ -68,7 +68,11 @@ jobs:
         env:
           BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
         timeout-minutes: 10
-        run: docker compose build --push
+        run: docker compose build
+        
+      - name: Push images
+        timeout-minutes: 5
+        run: docker compose push
           
       - name: Deploy with Helm
         run: |
